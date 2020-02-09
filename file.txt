@@ -1,0 +1,5 @@
+push Int8(1223)
+push Int16(13)
+push Int16(1212)
+dump
+;;
