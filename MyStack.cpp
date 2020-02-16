@@ -11,9 +11,14 @@ void	MyStack::assertOperand(eOperandType type, std::string const & value)
 	out += BLUE "assert: " WHITE;
 	if (empty())
 		throw (EmptyException());
-	if (type == Double || type == Float)
+	if (type == Float)
 	{
 		if (toOperandType(type) + "(" + std::to_string(stof(value)) + ")" != top()->toString())
+			throw (AssertException());
+	}
+	else if (type == Double)
+	{
+		if (toOperandType(type) + "(" + std::to_string(stod(value)) + ")" != top()->toString())
 			throw (AssertException());
 	}
 	else if (toOperandType(type) + "(" + value + ")" != top()->toString())
