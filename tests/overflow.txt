@@ -1,0 +1,5 @@
+push Int8(1232)
+push Int(13)
+push Int16(1232)
+dump
+exit

@@ -28,7 +28,6 @@ void	MyStack::mypop(void)
 		throw MyStack::EmptyException();
 	out += MAGENTA "✗" WHITE + top()->toString() + "\n";
 	pop();
-	types.pop();
 }
 
 void	MyStack::dump(void)
@@ -37,26 +36,13 @@ void	MyStack::dump(void)
 	if (empty())
 		throw EmptyException();
 	MyStack save(*this);
-	stack<eOperandType> typesave(types);
 	out += "\n";
 	while (!empty())
 	{
-		
-		if (types.top() == Int8)
-			out += "\t" + dynamic_cast<const Operand<int8_t> *>(top())->toString() + " \n";
-		else if (types.top() == Int16)
-			out += "\t" + dynamic_cast<const Operand<int16_t> *>(top())->toString() + " \n";
-		else if (types.top() == Double)
-			out += "\t" + dynamic_cast<const Operand<double> *>(top())->toString() + " \n";
-		else if (types.top() == Int32)
-			out += "\t" + dynamic_cast<const Operand<int32_t> *>(top())->toString() + " \n";
-		else if (types.top() == Float)
-			out += "\t" + dynamic_cast<const Operand<float> *>(top())->toString() + " \n";
+		out += "\t" + (top())->toString() + "\n";
 		pop();
-		types.pop();
 	}
 	*this = save;
-	types = typesave;
 }
 
 void	MyStack::exit(void)
@@ -68,14 +54,11 @@ void	MyStack::exit(void)
 void	MyStack::doBinary(const char c)
 {
 	const IOperand *adder1;
-	out += ORANGE;
-	out += c;
-	out += ": " WHITE;
+	out = (((out + (ORANGE) + c) + ": ") + WHITE);
 	if (!empty())
 	{
 		adder1 = top();
 		pop();
-		types.pop();
 	}
 	else
 		throw MyStack::EmptyException();
@@ -84,7 +67,6 @@ void	MyStack::doBinary(const char c)
 	{
 		adder2 = top();
 		pop();
-		types.pop();
 	}
 	else
 	{
@@ -100,7 +82,6 @@ void	MyStack::doBinary(const char c)
 		case '/': sum = *adder1 / *adder2; break;
 		case '%': sum = *adder1 % *adder2; break;
 	}
-	types.push(sum->getType());
 	push(sum);
 }
 
@@ -160,7 +141,6 @@ IOperand const * MyStack::createInt8( std::string const & value ) const
 {
 	Operand<int8_t> * ret = new Operand<int8_t>(Int8, -128, 127, value);
 	ret->string_value = "Int8(" + std::to_string(stoi(value)) + ')';
-
 	return (ret);
 }
 
@@ -196,7 +176,6 @@ IOperand const * MyStack::createDouble( std::string const & value ) const
 	return (ret);
 }
 
-
 IOperand const * MyStack::createOperand( eOperandType type, std::string const & value ) const
 {
 	IOperand const *(MyStack::*f[])(std::string const & value) const = {&MyStack::createInt8, &MyStack::createInt16, &MyStack::createInt32, &MyStack::createFloat, &MyStack::createDouble};
@@ -212,18 +191,8 @@ void	MyStack::pushOperand(eOperandType type, std::string const & value)
 	out = ((((((out + BLUE) + "push: ") + WHITE) + toOperandType(type).c_str()) + "(" + value.c_str()) + ")\n");
 	const IOperand *v;
 	v = createOperand(type, value);
-	types.push(type);
-	if (type == Int8)
-		push(dynamic_cast<const Operand<int8_t> *>(v));
-	else if (type == Int16)
-		push(dynamic_cast<const Operand<int16_t> *>(v));
-	else if (type == Int32)
-		push(dynamic_cast<const Operand<int32_t> *>(v));
-	else if (type == Float)
-		push(dynamic_cast<const Operand<float> *>(v));
-	else if (type == Double)
-		push(dynamic_cast<const Operand<double> *>(v));
-	else
-		push(v);
+	push(v);
 }
+
+
 

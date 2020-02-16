@@ -1,0 +1,4 @@
+push int(32)
+push int(0)
+div
+exit

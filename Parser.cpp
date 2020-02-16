@@ -1,31 +1,18 @@
 
 #include "abstract_vm.hpp"
 
-char *cut(char *&s, int end)
-{
-	if (end == -1)
-		return (s);
-	s[end] = '\0';
-	s = s + end + 1;
-	return (s - end - 1);
-}
-
-int find_first_not_of(char *&str, char c)
+char * find_first_not_of(char *str, char c)
 {
 	int i = 0;
 	for (i = 0; str[i] && str[i] == c; i++);
-	if (!str[i])
-		return (-1);
-	return (i);
+	return (str + i);
 }
 
-int find_first_of(char *&str, char c)
+char * find_first_of(char *&str, char c)
 {
 	int i = 0;
 	for (i = 0; str[i] && str[i] != c; i++);
-	if (!str[i])
-		return (-1);
-	return (i);
+	return (str + i);
 }
 
 int	getInput(int &argc, std::fstream &myfile, std::string &inst)
@@ -38,7 +25,7 @@ int	getInput(int &argc, std::fstream &myfile, std::string &inst)
 //
 // It's a feature nobody likes
 //
-//	out = (((((out + CYAN) + "____Your input: '") + inst) + "'\n") + WHITE);
+//	 out = (((((out + CYAN) + "____Your input: '") + inst) + "'\n") + WHITE);
 //
 	return (1);
 }
@@ -54,57 +41,38 @@ int	getFile(std::fstream &myfile)
 	}
 }
 
-int	limits_defined(char *&instr, int &s, int &e)
-{
-	s = find_first_of(instr, '(');
-	e = find_first_of(instr, ')');
 
-	if (s == -1)
+void	parse2instr(MyStack &s, char *&inst, char *& spaces)
+{
+	char *type = find_first_not_of(spaces, ' ');
+	if (*find_first_of(type, '(') == '\0')
 	{
-		out = (((out + RED) + "Expected '('\n") + WHITE);		
-		return 0;
+		out = (((out + RED) + "Expected '('\n") + WHITE);
+		return;
 	}
-	else if (e == -1)
+	char *value = find_first_of(type, '(');
+	*value = '\0';
+	value++;
+	char *trash;
+	if (*(trash = find_first_of(value, ')')) == '\0')
 	{
 		out = (((out + RED) + "Expected ')'\n") + WHITE);
-		return 0;
 	}
-	return 1;
-}
-
-
-void	parse2instr(MyStack &s, char *&command, char *&instr)
-{
-	int start;
-	int end;
-	if (limits_defined(instr, start, end) == -1)
-		return ;
-//	cut(instr, find_first_not_of(instr, ' ') - 1);
-	//printf("instr before shift is '%s'\n", instr);
-	instr = instr + find_first_not_of(instr, ' ');
-	//printf("instr after shift is '%s'\n", instr);
-	char *type = cut(instr, find_first_of(instr, '('));
-//	instr++;
-	//printf("type is '%s'\n", type);
-	//printf("instr before is '%s'\n", instr);
-	
-//	instr[end] = '\0';
-//fix this
-	instr[find_first_of(instr, ')')] = '\0';
-	//printf("instr after  is '%s'\n", instr);	
-	char *value = instr;
-	//teset
-	instr = instr + strlen(instr) + 1;
-	if (*instr != '\0' && find_first_not_of(instr, ' ') != -1)
-		out = (((((out + CYAN) + "Unexpected symbols after instruction ignored: ") + WHITE) + "'" + instr + "'") + "\n");
-
-//	value[end - 2] = '\0';
-	//printf("calue is %s\n", value);
+	else
+	{
+		*trash = '\0';
+		trash++;
+		trash = find_first_not_of(trash, ' ');
+	}
+	if (*trash != '\0')
+	{
+		out = (((((out + CYAN) + "Unexpected symbols after instruction ignored: ") + WHITE) + "'" + trash + "'") + "\n");
+	}
 	if (toOperandType(type) == Int8 && strcmp(type, "int8") != 0)
-		out = (((((out + RED) + "Unknown type: ") + WHITE) + "'" + type + "' " RED "defaults to Int8" WHITE )+ "\n");
+		out = (((((out + RED) + "Unknown type: ") + WHITE) + "'" + type + "' " RED "defaults to Int8" WHITE) + "\n");
 	try
 	{
-		s.doCommand(command, toOperandType(type), value);
+		s.doCommand(inst, toOperandType(type), value);
 	}
 	catch (const std::invalid_argument& ia)
 	{
@@ -128,13 +96,15 @@ void	parse2instr(MyStack &s, char *&command, char *&instr)
 	}
 }
 
-void	parse1instr(MyStack &s, char *&command, char *&instr)
+void	parse1instr(MyStack &s, char *& inst, char *&spaces)
 {
-	if (command != instr && find_first_not_of(instr, ' ') != -1)
-		out = (((((out + CYAN) + "Unexpected symbols after instruction ignored: ") + WHITE) + "'" + instr + "'") + "\n");
-		try
+	if (spaces[0] != '\0' && *find_first_not_of(spaces, ' ') != '\0')
 	{
-		s.doCommand(command);
+		out = ((((((out + CYAN) + "Unexpected symbols after instruction ignored: ") + WHITE) + "'" + find_first_not_of(spaces, ' ')) + "'") + "\n");
+	}
+	try
+	{
+		s.doCommand(inst);
 	}
 	catch (Operand<double>::OverflowException& e)
 	{
@@ -154,51 +124,40 @@ void	parse1instr(MyStack &s, char *&command, char *&instr)
 	}
 }
 
-void	splitInst(char *&instr, std::string &inst, char *&start, char *&command, char c)
+void	parseInstr(MyStack &s, char *inst)
 {
-	instr = new char[inst.length()];
-	start = instr;
-	strcpy(instr, inst.c_str());
-	if (find_first_of(instr, c) != -1)
-		command = cut(instr, find_first_of(instr, c));
-	else
-		command = instr;
-}
-
-void	parseInstr(MyStack &s, char *&instr, std::string &inst, char *&start, char *&command)
-{
-	//printf("find first of %d\n", comment);
-	//printf("here1\n");
-	int comment = inst.find_first_of(';', 0);
-	if (comment != -1)
+	inst = find_first_not_of(inst, ' ');
+	char * comment = find_first_of(inst, ';');
+	if (*comment != '\0')
 	{
-		inst[comment] = '\0';
-		out = ((((out + GREEN) + ";" + (inst.c_str() + comment + 1)) + "\n") + WHITE);
+		*comment = '\0';
+		out = ((((out + GREEN) + ";" + (comment + 1)) + "\n") + WHITE);
 	}
-	//printf("here\n");
-	splitInst(instr, inst, start, command, ' ');
-
-	if (s.status && command != inst &&
-		(strcmp(command, "push") == 0
-		|| strcmp(command, "assert") == 0))
+	char * spaces = find_first_of(inst, ' ');
+	if (spaces[0] != '\0')
 	{
-		parse2instr(s, command, instr);
+		spaces[0] = '\0';
+		spaces++;
+	}
+	if (s.status && (strcmp(inst, "push") == 0 || strcmp(inst, "assert") == 0))
+	{
+		parse2instr(s, inst, spaces);
 	}
 	else if (s.status &&
-	(strcmp(command, "sub") == 0
-	|| strcmp(command, "add") == 0
-	|| strcmp(command, "mul") == 0
-	|| strcmp(command, "div") == 0
-	|| strcmp(command, "mod") == 0
-	|| strcmp(command, "dump") == 0
-	|| strcmp(command, "pop") == 0
-	|| strcmp(command, "print") == 0
-	|| strcmp(command, "exit") == 0))
+	(strcmp(inst, "sub") == 0
+	|| strcmp(inst, "add") == 0
+	|| strcmp(inst, "mul") == 0
+	|| strcmp(inst, "div") == 0
+	|| strcmp(inst, "mod") == 0
+	|| strcmp(inst, "dump") == 0
+	|| strcmp(inst, "pop") == 0
+	|| strcmp(inst, "print") == 0
+	|| strcmp(inst, "exit") == 0))
 	{
-		parse1instr(s, command, instr);
+		parse1instr(s, inst, spaces);
 	}
-	else
-		std::cout << RED "Illegal command ignored: " WHITE "'" << command << "'" << std::endl;
+	else if (*inst)
+		std::cout << RED "Illegal command ignored: " WHITE "'" << inst << "'" << std::endl;
 }
 
 eCommand	toCommand(char *s)
@@ -224,7 +183,7 @@ eCommand	toCommand(char *s)
 	return (add);
 }
 
-std::string toOperandType(eOperandType & s)
+std::string toOperandType(eOperandType const & s)
 {
 	if (s == Int8)
 		return "Int8";

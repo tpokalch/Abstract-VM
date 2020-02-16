@@ -1,0 +1,22 @@
+;	this virtual machine can read from files and from the command line
+;	binary operations are:
+;		add, mul, sub, div, mod
+;		print, pop, dump, exit, ;;.
+;	unary operations are:
+;		push TYPE(VALUE), assert TYPE(VALUE)
+;	types are:
+;		int8, int16, int32, float, double
+;	values are just strings of numbers
+push int8(123)
+push int8(-123)
+dump
+mod
+dump
+push float(42.42)
+dump
+assert float(32.42)             ;throws exception if !=
+push int8(125)
+print                           ;prints int8 as a char
+dump
+exit                            ;should exit before quitting
+;;

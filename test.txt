@@ -1,4 +1,0 @@
-push Int(32)
-push Int(0)
-div
-exit

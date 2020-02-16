@@ -10,6 +10,7 @@
 #include <fstream>
 #include <float.h>
 #include <fstream>
+#include <string.h>
 
 #define RED "\033[38;5;1m"
 #define BLUE "\033[38;5;75m"
@@ -24,13 +25,13 @@
 extern std::string out;
 
 void	splitInst(char *&instr, std::string &inst, char *&start, char *&command, char c);
-void	parseInstr(MyStack &s, char *&instr, std::string &inst, char *&start, char *&command);
+void	parseInstr(MyStack &s, char *inst);
 void	parse1instr(MyStack &s, char *&command, char *&instr);
 void	parse2instr(MyStack &s, char *&command, char *&instr);
 int	getFile(std::fstream &myfile);
 int	getInput(int &argc, std::fstream &myfile, std::string &inst);
-int		find_first_of(char *&str, char c);
-int		find_first_not_of(char *&str, char c);
+char *		find_first_of(char *&str, char c);
+char *		find_first_not_of(char *str, char c);
 char *cut(char *&s, size_t end);
 
 enum	eCommandOperand
@@ -53,9 +54,8 @@ enum	eCommand
 };
 
 eCommandOperand	toCommandOperand(char *s);
-std::string toOperandType(eOperandType & s);
 eCommand	toCommand(char *s);
-std::string toOperandType(eOperandType & s);
+std::string toOperandType(eOperandType const & s);
 eOperandType toOperandType(std::string const & s);
 
 template <typename T>
@@ -160,7 +160,13 @@ Operand<T>::Operand(eOperandType const & t, long double min, long double max, st
 
 	check = std::stold(v);
 	if (check < min || check > max)
+	{
 		throw OverflowException();
+	}
+/*	swit
+	string_value = toOperandType(t) + '(' + value + ')';
+	"Int8(" + std::to_string(stoi(value)) + ')';
+*/
 }
 
 #endif

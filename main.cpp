@@ -14,31 +14,17 @@ int	main(int argc, char **argv)
 		if (argc == 2)
 			if (getFile(myfile) == 0)
 				return (0);
-		char *command;
-		char *instr;
-		char *start;
 		while (1)
 		{
-			if (!getInput(argc, myfile, inst))
+			if (!getInput(argc, myfile, inst)
+				|| ((inst == ";;" && argc == 1)
+				|| (!s.status && argc == 2)))
 			{
 				if (s.status)
 					out += RED "Error: " WHITE "terminating without exit\n";
 				break ;
 			}
-			if ((inst == ";;" && argc == 1) || (!s.status && argc == 2))
-			{
-				if (s.status)
-					out += RED "Error: " WHITE "terminating without exit\n";
-				break;
-			}
-			else if (inst[0] == ';')
-			{
-				out = ((((out + GREEN) + inst) + WHITE) + "\n");
-				continue;
-			}
-			parseInstr(s, instr, inst, start, command);
-			if (start)
-				free(start);
+			parseInstr(s, &inst[0]);
 		}
 	}
 	std::cout << out;

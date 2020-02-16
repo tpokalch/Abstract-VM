@@ -34,8 +34,6 @@ class	MyStack: public std::stack<const IOperand *>
 		void	print();
 		void	exit();
 
-		stack<eOperandType> types;
-
 		class	EmptyException: public std::exception
 		{
 			public:

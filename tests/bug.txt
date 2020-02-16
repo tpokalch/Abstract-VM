@@ -1,0 +1,34 @@
+push    Float(0) ;push float
+push Int8(1223) ;push int813
+push Int16(22)
+push Int8(1232)
+dump  ;dump
+dump  
+dump  
+push Int8(32)
+push   Int8(0;no ')' here
+push Int8(123)
+;push (0)
+dump
+add
+adklwkd awd
+push 
+push asd
+push Int8(2;)no closing
+dump ;hello
+add    hello
+div
+push Float(2)
+dump  
+dump  
+div
+dump
+mod
+dump
+pop
+pop
+dump
+exit
+push Int8(123)
+
+
